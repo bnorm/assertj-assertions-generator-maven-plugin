@@ -20,6 +20,7 @@ import static org.assertj.assertions.generator.AssertionsEntryPointType.BDD;
 import static org.assertj.assertions.generator.AssertionsEntryPointType.JUNIT_SOFT;
 import static org.assertj.assertions.generator.AssertionsEntryPointType.SOFT;
 import static org.assertj.assertions.generator.AssertionsEntryPointType.STANDARD;
+import static org.assertj.assertions.generator.util.ClassUtil.collectClasses;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -35,6 +36,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.assertj.assertions.generator.description.converter.AnnotationConfiguration;
 import org.assertj.core.util.VisibleForTesting;
 import org.assertj.maven.generator.AssertionsGenerator;
 import org.assertj.maven.generator.AssertionsGeneratorReport;
@@ -137,6 +139,15 @@ public class AssertJAssertionsGeneratorMojo extends AbstractMojo {
   @Parameter(property = "assertj.templates")
   public Templates templates;
 
+  @Parameter(property = "assertj.annotation.include.classes")
+  public String[] includeClassAnnotations = new String[0];
+
+  @Parameter(property = "assertj.annotation.include.method")
+  public String[] includeMethodAnnotations = new String[0];
+
+  @Parameter(property = "assertj.annotation.exclude.method")
+  public String[] excludeMethodAnnotations = new String[0];
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
 	if (skip) {
@@ -146,7 +157,12 @@ public class AssertJAssertionsGeneratorMojo extends AbstractMojo {
 	failIfMojoParametersAreMissing();
 	try {
 	  ClassLoader projectClassLoader = getProjectClassLoader();
-	  AssertionsGenerator assertionGenerator = new AssertionsGenerator(projectClassLoader);
+	  AnnotationConfiguration annotationConfiguration = new AnnotationConfiguration(
+			  collectClasses(projectClassLoader, includeClassAnnotations),
+			  collectClasses(projectClassLoader, includeMethodAnnotations),
+			  collectClasses(projectClassLoader, excludeMethodAnnotations));
+	  System.out.println(annotationConfiguration.getIncludeClassAnnotations());
+	  AssertionsGenerator assertionGenerator = new AssertionsGenerator(projectClassLoader, annotationConfiguration);
 	  assertionGenerator.setIncludePatterns(includes);
 	  assertionGenerator.setExcludePatterns(excludes);
 	  if (generateAssertions) assertionGenerator.enableEntryPointClassesGenerationFor(STANDARD);

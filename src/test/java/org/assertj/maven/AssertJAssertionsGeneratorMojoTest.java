@@ -30,6 +30,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.assertj.assertions.generator.BaseAssertionGenerator;
 import org.assertj.assertions.generator.description.ClassDescription;
+import org.assertj.assertions.generator.description.converter.AnnotationConfiguration;
 import org.assertj.maven.generator.AssertionsGenerator;
 import org.assertj.maven.generator.AssertionsGeneratorReport;
 import org.assertj.maven.test.All;
@@ -308,7 +309,8 @@ public class AssertJAssertionsGeneratorMojoTest {
     assertjAssertionsGeneratorMojo.classes = array("org.assertj.maven.test.Employee");
     when(mavenProject.getCompileClasspathElements()).thenReturn(newArrayList(Employee.class.getName()));
     // let's throws an IOException when generating custom assertions
-    AssertionsGenerator generator = new AssertionsGenerator(Thread.currentThread().getContextClassLoader());
+    AssertionsGenerator generator = new AssertionsGenerator(Thread.currentThread().getContextClassLoader(),
+                                                            new AnnotationConfiguration());
     BaseAssertionGenerator baseGenerator = mock(BaseAssertionGenerator.class);
     generator.setBaseGenerator(baseGenerator);
     when(baseGenerator.generateCustomAssertionFor(any(ClassDescription.class))).thenThrow(IOException.class);
@@ -322,7 +324,8 @@ public class AssertJAssertionsGeneratorMojoTest {
   public void input_classes_not_found_should_be_listed_in_generator_report() throws Exception {
     assertjAssertionsGeneratorMojo.classes = array("org.assertj.maven.test.Employee", "org.Foo", "org.Bar");
     when(mavenProject.getCompileClasspathElements()).thenReturn(newArrayList(Employee.class.getName()));
-    AssertionsGenerator generator = new AssertionsGenerator(Thread.currentThread().getContextClassLoader());
+    AssertionsGenerator generator = new AssertionsGenerator(Thread.currentThread().getContextClassLoader(),
+                                                            new AnnotationConfiguration());
 
     AssertionsGeneratorReport report = assertjAssertionsGeneratorMojo.executeWithAssertionGenerator(generator);
 

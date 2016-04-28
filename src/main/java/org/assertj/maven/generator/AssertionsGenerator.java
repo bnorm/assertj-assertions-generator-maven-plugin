@@ -32,6 +32,7 @@ import org.assertj.assertions.generator.AssertionsEntryPointType;
 import org.assertj.assertions.generator.BaseAssertionGenerator;
 import org.assertj.assertions.generator.Template;
 import org.assertj.assertions.generator.description.ClassDescription;
+import org.assertj.assertions.generator.description.converter.AnnotationConfiguration;
 import org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter;
 import org.assertj.core.util.VisibleForTesting;
 import org.assertj.maven.Templates;
@@ -51,8 +52,12 @@ public class AssertionsGenerator {
   private Set<AssertionsEntryPointType> assertionsEntryPointToGenerate;
 
   public AssertionsGenerator(ClassLoader classLoader) throws FileNotFoundException, IOException {
+    this(classLoader, new AnnotationConfiguration());
+  }
+
+  public AssertionsGenerator(ClassLoader classLoader, AnnotationConfiguration config) throws FileNotFoundException, IOException {
     this.generator = new BaseAssertionGenerator();
-    this.converter = new ClassToClassDescriptionConverter();
+    this.converter = new ClassToClassDescriptionConverter(config);
     this.classLoader = classLoader;
     this.includePatterns = new Pattern[] { INCLUDE_EVERYTHING };
     this.excludePatterns = new Pattern[0];
